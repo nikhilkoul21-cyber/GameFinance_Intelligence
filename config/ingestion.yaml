@@ -1,0 +1,54 @@
+# ------------------------------------------------------------------
+# GameFin Intelligence — ingestion configuration (Phase 1, bronze layer)
+#
+# This file is the single source of truth for WHAT we ingest. The code
+# reads it and discovers matching filings live from the SEC EDGAR
+# submissions API — nothing about which documents to pull is hardcoded.
+# Change scope here, not in the Python.
+# ------------------------------------------------------------------
+
+# Companies to ingest. CIK = SEC Central Index Key (the stable company id).
+# Verified against EDGAR. Take-Two is primary; peers give us multi-company
+# comparison questions for the eval set later.
+companies:
+  - name: "Take-Two Interactive"
+    ticker: "TTWO"
+    cik: 946581            # verified: fiscal year end 31 March
+    primary: true
+  - name: "Electronic Arts"
+    ticker: "EA"
+    cik: 712515
+  - name: "Roblox"
+    ticker: "RBLX"
+    cik: 1315098
+
+# Which SEC form types to pull.
+#   10-K = annual report, 10-Q = quarterly report, 8-K = material event.
+forms:
+  - "10-K"
+  - "10-Q"
+  - "8-K"
+
+# Only ingest filings on/after this date (keeps the corpus ~4 fiscal years:
+# small enough to iterate fast, large enough to be credible).
+since_date: "2021-01-01"
+
+# Safety cap per (company, form) so a first run can't accidentally pull
+# hundreds of 8-Ks. Raise later once you've seen it work.
+max_per_form: 6
+
+# Politeness / compliance with SEC access rules.
+# SEC allows <= 10 requests/second/IP. We stay well under.
+rate_limit_per_sec: 5
+
+# Where the raw documents and the lineage manifest are written.
+bronze_dir: "data/bronze"
+
+# Known-good reference filings (VERIFIED real accession numbers).
+# The pipeline does NOT read these — they are here so you can eyeball that
+# a run pulled the right documents. Format: FY -> accession / primary doc.
+reference_10k:
+  FY2025: { accession: "0001628280-25-026694", doc: "ttwo-20250331.htm" }
+  FY2023: { accession: "0001628280-23-019851", doc: "ttwo-20230331.htm" }
+  FY2022: { accession: "0001628280-22-014580", doc: "ttwo-20220331.htm" }
+  FY2021: { accession: "0001628280-21-010627", doc: "ttwo-20210331.htm" }

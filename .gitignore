@@ -1,0 +1,33 @@
+# --- Secrets & environment ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Data layers (raw + derived data must NEVER be committed) ---
+# We keep the folder structure via .gitkeep but ignore the contents.
+data/bronze/*
+data/silver/*
+data/gold/*
+!data/bronze/.gitkeep
+!data/silver/.gitkeep
+!data/gold/.gitkeep
+
+# --- Local vector store / model caches ---
+qdrant_storage/
+.cache/
+models/
+
+# --- OS / editor noise ---
+.DS_Store
+.idea/
+.vscode/
