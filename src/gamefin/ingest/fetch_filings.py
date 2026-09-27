@@ -10,6 +10,7 @@ period, which URL, and a sha256 of exactly what we stored. That lineage is
 what makes an answer auditable — the same discipline as tracing a regulatory
 figure back to its system of record.
 """
+
 from __future__ import annotations
 
 import hashlib

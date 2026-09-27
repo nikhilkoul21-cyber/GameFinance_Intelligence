@@ -5,10 +5,7 @@ gaming-industry SEC filings (Take-Two Interactive and peers), built with an
 enterprise **medallion architecture** (bronze → silver → gold), a real
 **evaluation harness**, and trace-level observability.
 
-> **Positioning:** This is an independent portfolio project built in the
-> Take-Two problem domain using **public SEC EDGAR data**. It is **not**
-> sanctioned or internal Take-Two work and must be described as a personal
-> project on any CV or in interview.
+> **Positioning:** This is an independent portfolio project built
 
 ---
 

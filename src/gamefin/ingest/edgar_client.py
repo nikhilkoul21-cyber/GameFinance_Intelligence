@@ -14,6 +14,7 @@ EDGAR facts this relies on:
        filingDate[i], reportDate[i], primaryDocument[i], ...).
   * Document URL: https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no_dashes}/{primaryDocument}
 """
+
 from __future__ import annotations
 
 import time
@@ -32,21 +33,20 @@ from gamefin.logging_conf import get_logger
 log = get_logger(__name__)
 
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik_padded}.json"
-ARCHIVE_URL = (
-    "https://www.sec.gov/Archives/edgar/data/{cik}/{acc_nodash}/{doc}"
-)
+ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{acc_nodash}/{doc}"
 
 
 @dataclass(frozen=True)
 class Filing:
     """One filing's metadata — the unit of lineage we carry everywhere."""
+
     company: str
     ticker: str
     cik: int
     form: str
-    accession: str      # with dashes, e.g. 0001628280-25-026694
-    filing_date: str    # YYYY-MM-DD (date submitted to SEC)
-    report_date: str    # YYYY-MM-DD (period the filing covers)
+    accession: str  # with dashes, e.g. 0001628280-25-026694
+    filing_date: str  # YYYY-MM-DD (date submitted to SEC)
+    report_date: str  # YYYY-MM-DD (period the filing covers)
     primary_document: str
     url: str
 
@@ -145,9 +145,7 @@ class EdgarClient:
                 # No primary document listed (rare) — skip; nothing to fetch.
                 continue
             acc = accession[i]
-            url = ARCHIVE_URL.format(
-                cik=cik, acc_nodash=acc.replace("-", ""), doc=doc
-            )
+            url = ARCHIVE_URL.format(cik=cik, acc_nodash=acc.replace("-", ""), doc=doc)
             out.append(
                 Filing(
                     company=company_name,
