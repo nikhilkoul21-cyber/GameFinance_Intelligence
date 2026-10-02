@@ -5,10 +5,7 @@ gaming-industry SEC filings (Take-Two Interactive and peers), built with an
 enterprise **medallion architecture** (bronze → silver → gold), a real
 **evaluation harness**, and trace-level observability.
 
-> **Positioning:** This is an independent portfolio project built in the
-> Take-Two problem domain using **public SEC EDGAR data**. It is **not**
-> sanctioned or internal Take-Two work and must be described as a personal
-> project on any CV or in interview.
+> **Positioning:** This is an independent portfolio project built
 
 ---
 
@@ -21,42 +18,9 @@ lineage. Later phases add parsing/chunking (silver), embedding + Qdrant
 | Phase | Scope | State |
 |------|-------|-------|
 | 1 | Repo + config + **bronze ingestion** from EDGAR | **done** |
-| 2 | **Silver (parse/chunk) + Gold (embed → Qdrant) + retrieval + generation** | **done** |
-| 3 | Golden dataset + eval harness (RAGAS + LLM-as-judge) + eval gate | next |
+| 2 | Silver (parse/chunk) + Gold (embed → Qdrant) + retrieval + generation | next |
+| 3 | Golden dataset + eval harness (RAGAS + LLM-as-judge) + eval gate | planned |
 | 4 | FastAPI + UI, observability, deploy to a public URL | planned |
-
----
-
-## Quick start — Phase 2 (silver → gold → ask)
-
-Assumes Phase 1 has run (`data/bronze/manifest.jsonl` exists) and **Docker** is installed.
-
-```bash
-# 0. install the new Phase-2 dependencies
-pip install -r requirements.txt
-
-# 1. SILVER — parse + chunk the raw filings (no network, no keys)
-python scripts/run_silver.py
-#    -> data/silver/chunks.jsonl
-
-# 2. start Qdrant (the vector database) in Docker
-docker compose up -d
-#    dashboard: http://localhost:6333/dashboard
-
-# 3. GOLD — embed chunks locally (bge-base) + load into Qdrant
-python scripts/run_gold.py
-#    first run downloads the embedding model (~400MB), then is fast
-
-# 4. add an LLM key to .env (one of):
-#    OPENAI_API_KEY="sk-..."      # default provider
-#    ANTHROPIC_API_KEY="..."      # set llm_provider: anthropic in config/pipeline.yaml
-
-# 5. ASK — retrieve + grounded, cited answer
-python scripts/ask.py "What are Take-Two's key risk factors?"
-python scripts/ask.py --ticker TTWO "How did net bookings change year over year?"
-```
-
-Phase-2 behaviour is configured in **`config/pipeline.yaml`** (chunk size, embedding model, Qdrant collection, retrieval `top_k`, refusal threshold, LLM model).
 
 ---
 

@@ -1,0 +1,33 @@
+# ------------------------------------------------------------------
+# GameFin Intelligence — Python dependencies
+# Pinned with >= lower bounds; run `pip freeze > requirements.lock`
+# once your environment is stable to fully lock versions for reproducibility.
+# ------------------------------------------------------------------
+
+# --- Phase 1: ingestion (bronze layer) ---
+requests>=2.32,<3            # HTTP client for the EDGAR API
+tenacity>=9.0,<10            # retry-with-backoff on transient failures
+PyYAML>=6.0,<7               # read config/ingestion.yaml
+python-dotenv>=1.0,<2        # load .env (SEC_USER_AGENT, API keys)
+
+# --- Phase 1: dev tooling ---
+pytest>=8.0,<9               # unit tests
+
+# --- Phase 2: parsing + chunking (silver layer) — uncomment when we get there ---
+# beautifulsoup4>=4.12,<5
+# lxml>=5.0,<6
+# unstructured>=0.15,<1
+
+# --- Phase 2: embedding + vector store (gold layer) ---
+# sentence-transformers>=3.0,<4   # local BAAI/bge-base-en-v1.5 embeddings
+# qdrant-client>=1.11,<2
+
+# --- Phase 2: retrieval + generation + serving ---
+# llama-index>=0.11,<1
+# fastapi>=0.115,<1
+# uvicorn>=0.30,<1
+# streamlit>=1.38,<2
+
+# --- Phase 3: evaluation + observability ---
+# ragas>=0.2,<1
+# arize-phoenix>=5.0,<6

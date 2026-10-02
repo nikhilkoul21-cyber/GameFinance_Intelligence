@@ -1,0 +1,68 @@
+# ------------------------------------------------------------------
+# GameFin Intelligence — pipeline configuration (Phase 2)
+#
+# Phase 1 (config/ingestion.yaml) decided WHAT documents to fetch.
+# This file decides HOW we turn those raw documents into a searchable,
+# answerable knowledge base: how to chunk, how to embed, where to store
+# vectors, how to retrieve, and how to generate answers.
+#
+# Same principle as Phase 1: behaviour lives in config, not code.
+# ------------------------------------------------------------------
+
+# --- SILVER: parsing + chunking -----------------------------------
+silver:
+  # Target chunk size in characters. NOTE: this is tuned for prose, not a
+  # token guarantee — measured chars/token on our actual filings ranges from
+  # 6.1 (plain prose) down to 2.4 (dense financial-statement tables), so a
+  # single char budget can't safely bound token count for every section.
+  # 2000 chars keeps most chunks under embedding/embedder.py's bge-base
+  # limit (512 tokens); build_gold.py still re-splits on real tokens as a
+  # backstop for the table-heavy chunks this can't catch by itself.
+  chunk_chars: 2000
+  # Overlap between consecutive chunks, so a sentence split across a
+  # boundary still appears whole in at least one chunk.
+  overlap_chars: 300
+  # Drop chunks shorter than this (boilerplate scraps, page numbers).
+  min_chunk_chars: 200
+  silver_dir: "data/silver"
+
+# --- GOLD: embedding + vector store -------------------------------
+gold:
+  # Local, open-source embedding model (data never leaves your machine).
+  # bge-base outputs 768-dimensional vectors.
+  embedding_model: "BAAI/bge-base-en-v1.5"
+  embedding_dim: 768
+  # bge models expect this instruction prefixed to SEARCH QUERIES only
+  # (not to the stored passages). Improves retrieval quality noticeably.
+  query_instruction: "Represent this sentence for searching relevant passages: "
+  # How many chunks to embed per batch (memory vs speed trade-off).
+  embed_batch_size: 32
+  # Qdrant connection + collection.
+  qdrant_url_env: "QDRANT_URL"          # read the URL from .env
+  collection: "gamefin_filings"
+  distance: "Cosine"                     # similarity metric
+
+# --- COMPANIES: name -> ticker, for auto-detecting which company a
+# question is about -------------------------------------------------
+# Without this, a question that names a company in plain English ("for
+# take two") runs an UNFILTERED search across every company. That lets a
+# superficially similar competitor chunk (e.g. another company's generic
+# risk-factors boilerplate) outrank the named company's own content — see
+# serve/rag.py's _detect_ticker for how this is used (only applied when
+# exactly one company is named, so cross-company questions stay unfiltered).
+companies:
+  TTWO: ["take-two", "take two", "ttwo", "rockstar games", "rockstar"]
+  EA: ["electronic arts", "ea"]
+  RBLX: ["roblox", "rblx"]
+
+# --- SERVE: retrieval + generation --------------------------------
+serve:
+  top_k: 6                  # how many chunks to retrieve per question
+  # If the best retrieved chunk scores below this cosine similarity,
+  # we assume the corpus can't answer and REFUSE instead of guessing.
+  min_score: 0.30
+  # Provider-agnostic LLM. Set the matching key in .env.
+  llm_provider: "anthropic"    # "openai" | "anthropic"
+  llm_model: "claude-haiku-4-5"  # cheap + capable for dev
+  temperature: 0.0          # deterministic, factual answers
+  max_tokens: 700
